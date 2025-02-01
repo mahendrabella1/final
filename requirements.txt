@@ -1,0 +1,12 @@
+streamlit
+requests
+beautifulsoup4
+nltk
+torch
+transformers
+python-dotenv
+pinecone-client
+langchain
+langchain-community
+sentence-transformers
+groq
