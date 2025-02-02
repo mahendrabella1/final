@@ -10,6 +10,8 @@ from langchain_community.vectorstores import Pinecone as PineconeVectorStore
 from langchain_community.document_loaders import PyPDFLoader, OnlinePDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain.chains.combine_documents import StuffDocumentsChain
+from langchain.prompts import PromptTemplate
 from bs4 import BeautifulSoup
 import torch
 from groq import Groq
@@ -84,7 +86,8 @@ def query_chatbot(question):
         return f"❌ Error: Could not connect to Pinecone index. {str(e)}"
 
     retriever = docsearch.as_retriever(search_kwargs={"k": 5})
-    qa_chain = RetrievalQA(retriever=retriever)
+    combine_chain = StuffDocumentsChain(prompt=PromptTemplate(input_variables=["context"], template="{context}"))
+    qa_chain = RetrievalQA(retriever=retriever, combine_documents_chain=combine_chain)
     response = qa_chain.run(question)
     
     return response if response else "❌ No relevant information found."
