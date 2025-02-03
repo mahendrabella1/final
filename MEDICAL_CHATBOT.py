@@ -110,7 +110,7 @@ def query_chatbot(question):
             {"role": "system", "content": "You are a helpful AI assistant specialized in answering questions based on provided medical content."},
             {"role": "user", "content": f"Here is the relevant information from the stored data:\n\n{retrieved_text}\n\nUser's question: {question}"}
         ],
-        model="llama-3.3-70b-versatile",  
+        model="deepseek-r1-distill-llama-70b",  
         stream=False,
     )
 
