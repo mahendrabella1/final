@@ -44,10 +44,6 @@ def extract_text_from_webpage(url):
     paragraphs = soup.find_all("p")
     return "\n".join([para.get_text() for para in paragraphs]).strip()
 
-# Load PDF and extract text
-def load_pdf(pdf_path):
-    return PyPDFLoader(pdf_path).load()
-
 # Store embeddings from PDF or webpage
 def store_embeddings(input_path):
     if input_path.startswith("http"):
@@ -62,7 +58,7 @@ def store_embeddings(input_path):
                 return "❌ Error: No readable text found on the webpage."
             documents = [{"page_content": text_data}]
     else:
-        documents = load_pdf(input_path)
+        documents = PyPDFLoader(input_path).load()
     
     text_data = "\n".join([doc.page_content for doc in documents])
     
@@ -144,6 +140,8 @@ st.markdown("<h1 style='text-align: center;'>💬 Medical-Bot - AI-powered Medic
 
 if "queries" not in st.session_state:
     st.session_state.queries = []
+if "last_question" not in st.session_state:
+    st.session_state.last_question = ""
 
 st.markdown("<h3>💬 Chat History</h3>", unsafe_allow_html=True)
 chat_container = st.container()
@@ -190,15 +188,6 @@ st.markdown("""
             resize: none;
             height: 80px;
         }
-        .stTextArea>div::after {
-            content: "➜";
-            position: absolute;
-            right: 15px;
-            bottom: 20px;
-            font-size: 24px;
-            color: #0084ff;
-            animation: moveArrow 1.5s infinite ease-in-out;
-        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -206,12 +195,13 @@ st.markdown("<div class='input-container'>", unsafe_allow_html=True)
 question = st.text_area("", height=80, max_chars=500, key="question_box", placeholder="Type your message...")
 st.markdown("</div>", unsafe_allow_html=True)
 
-if question:
+if question and question != st.session_state.last_question:
     with st.spinner("🤔 Generating response... Please wait!"):
         try:
             response = query_chatbot(question)
             st.session_state.queries.append((question, response))
-            st.rerun()
+            st.session_state.last_question = question
+            st.experimental_rerun()
         except Exception as e:
             st.error(f"❌ Error generating response: {str(e)}")
 
