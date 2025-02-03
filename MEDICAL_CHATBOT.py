@@ -10,7 +10,6 @@ from langchain_community.vectorstores import Pinecone as PineconeVectorStore
 from langchain_community.document_loaders import PyPDFLoader, OnlinePDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.chains.combine_documents import StuffDocumentsChain
 from langchain.prompts import PromptTemplate
 from bs4 import BeautifulSoup
 import torch
