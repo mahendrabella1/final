@@ -121,13 +121,11 @@ def query_chatbot(question):
 
 #-------------------------------------------STREAMLITUI---------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------------
+# Streamlit UI Setup
+st.set_page_config(page_title="🩺 Medical-Bot", layout="wide")
 
-# Streamlit interface setup
-st.set_page_config(page_title="Medical-Bot", layout="wide")
-st.title("🩺 Medical-Bot - AI-powered Medical Assistant")
-
-# Sidebar for data source selection
-st.sidebar.header("Data Source Selection")
+# Sidebar for data selection
+st.sidebar.header("📂 Data Source Selection")
 data_source = st.sidebar.radio("Choose data source:", ["Upload a PDF", "Enter a URL", "Use Default Data"])
 
 pdf_file = None
@@ -139,10 +137,6 @@ elif data_source == "Enter a URL":
     url_input = st.sidebar.text_input("🔗 Paste a URL:")
 elif data_source == "Use Default Data":
     st.sidebar.write("📚 Using preloaded medical data.")
-
-# Initialize session state for storing queries and responses
-if "queries" not in st.session_state:
-    st.session_state.queries = []
 
 # Process Data Button
 if st.sidebar.button("⚡ Process Data"):
@@ -164,57 +158,91 @@ if st.sidebar.button("⚡ Process Data"):
         except Exception as e:
             st.sidebar.error(f"❌ Error processing data: {str(e)}")
 
-# User query interface
-st.header("🤖 Ask Your Medical Question")
-question = st.text_area("Type your query below:", height=80, max_chars=500, key="question_box", placeholder="Ask a question...")
+# Chat Header
+st.markdown("<h1 style='text-align: center;'>💬 Medical-Bot - AI-powered Medical Assistant</h1>", unsafe_allow_html=True)
 
-# Styling the input box and making it fixed at the bottom
-st.markdown(
-    """
+# Initialize chat history
+if "queries" not in st.session_state:
+    st.session_state.queries = []
+
+# Display Chat History
+st.markdown("<h3>💬 Chat History</h3>", unsafe_allow_html=True)
+chat_container = st.container()
+
+with chat_container:
+    for q, r in st.session_state.queries:
+        st.markdown(f"""
+            <div style="
+                border: 1px solid #444;
+                border-radius: 10px;
+                padding: 10px;
+                margin-bottom: 10px;
+                background-color: #262626;
+            ">
+                <div style="font-weight: bold; color: #0084ff;">👤 You:</div>
+                <div style="margin-bottom: 8px;">{q}</div>
+                <hr style="border: 0.5px solid #444;">
+                <div style="font-weight: bold; color: #00d4ff;">🤖 Bot:</div>
+                <div>{r}</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+# User Input Box (Fixed at Bottom)
+st.markdown("""
     <style>
-    .css-18e3th9 {
-        height: 80px;
-        font-size: 16px;
-    }
-    .stTextArea>div>textarea {
-        width: 100%;
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        font-size: 16px;
-        padding: 15px;
-        margin-bottom: 15px;
-    }
-    .chat-box-container {
-        max-height: 300px;
-        overflow-y: auto;
-        margin-bottom: 150px;
-    }
-    .css-1kyxreq {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-    }
+        .input-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #1e1e1e;
+            padding: 15px;
+            border-top: 1px solid #444;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .stTextArea>div>textarea {
+            background-color: #222;
+            color: white;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 16px;
+            width: 85%;
+            resize: none;
+            height: 80px;
+        }
+        .stTextArea>div::after {
+            content: "➜";
+            position: absolute;
+            right: 15px;
+            bottom: 20px;
+            font-size: 24px;
+            color: #0084ff;
+            animation: moveArrow 1.5s infinite ease-in-out;
+        }
+        @keyframes moveArrow {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
     </style>
-    """, unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
 
-# Submit button
-if st.button("💬 Submit Query") and question:
+st.markdown("<div class='input-container'>", unsafe_allow_html=True)
+question = st.text_area("", height=80, max_chars=500, key="question_box", placeholder="Type your message...")
+st.markdown("</div>", unsafe_allow_html=True)
+
+# Submit Button
+if question:
     with st.spinner("🤔 Generating response... Please wait!"):
         try:
             response = query_chatbot(question)
             st.session_state.queries.append((question, response))
+            st.rerun()
         except Exception as e:
             st.error(f"❌ Error generating response: {str(e)}")
 
-# Display Chat History
-st.subheader("💬 Chat History")
-chat_history = st.container()
-with chat_history:
-    for q, r in st.session_state.queries:
-        st.write(f"**You:** {q}")
-        st.write(f"**Bot:** {r}")
-
-# Footer section
+# Footer
 st.markdown("---")
 st.markdown("🔍 **Medical-Bot** - AI-powered assistant for medical information. 💡")
